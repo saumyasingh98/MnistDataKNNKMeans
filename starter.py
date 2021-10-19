@@ -62,11 +62,6 @@ def read_data(file_name):
             data_set.append([label, attribs])
     return data_set
 
-train = read_data("train.csv")
-print(train.shape)
-
-#print(knn(train, , euclidean))
-
 def show(file_name, mode):
     data_set = read_data(file_name)
     for obs in range(len(data_set)):
