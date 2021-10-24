@@ -23,7 +23,7 @@ def cosim(a,b):
 # All hyper-parameters should be hard-coded in the algorithm.
 def knn(train,query,metric):
     dis=[]
-    k=3
+    k=5
     for i in train:
         for j in train[i]:
             d = euclidean(j,query)
