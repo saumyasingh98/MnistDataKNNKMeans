@@ -1,5 +1,6 @@
 import random
-
+from sklearn.metrics.pairwise import euclidean_distances
+from sklearn.metrics.pairwise import cosine_similarity
 
 def read_data(file_name):
     data_set = []
@@ -71,9 +72,15 @@ def cosim(a, b):
 train = read_data("train.csv")
 test = read_data("test.csv")
 
+def test_distances(a, b):
+    euclidean_d = euclidean(a, b)
+    cosim_d = cosim(a,b)
+
+    sklearn_euclidean = euclidean_distances(a, b)
+    sklearn_cosim = cosine_similarity
 
 # returns a list of labels for the query dataset based upon labeled observations in the train dataset.
-# metric is a string specifying either "euclidean" or "cosim".  
+# metric is a string specifying either "euclidean" or "cosim".
 # All hyper-parameters should be hard-coded in the algorithm.
 def knn(train, query, metric):
     k = 10
@@ -153,7 +160,7 @@ print("Accuracy Percentage = " + str(pre_accuracy*100/len(ans_predictions)))
 
 # returns a list of labels for the query dataset based upon observations in the train dataset.
 # labels should be ignored in the training set
-# metric is a string specifying either "euclidean" or "cosim".  
+# metric is a string specifying either "euclidean" or "cosim".
 # All hyper-parameters should be hard-coded in the algorithm.
 def initialize_centroids(data, k):
     initial_centroids = []
