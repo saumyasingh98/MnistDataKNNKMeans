@@ -71,6 +71,7 @@ def cosim(a, b):
 
 train = read_data("train.csv")
 test = read_data("test.csv")
+valid = read_data("valid.csv")
 
 def test_distances(a, b):
     euclidean_d = euclidean(a, b)
@@ -89,7 +90,7 @@ def knn(train, query, metric):
         if metric == "euclid":
             dist = euclidean(query[1], train_row[1])
         else:
-            dist = cosim(query, train_row)
+            dist = cosim(query[1], train_row[1])
         distances.append((train_row, dist))
     distances.sort(key=lambda tup: tup[1])
     neighbors = list()
@@ -139,23 +140,25 @@ def confusion_matrix(actual, predict, labels):
     return matrix
 
 
-ans_predictions = knn_predictions(train, test, "euclid")
+print("Starting KNN Euclid - Test")
+test_predictions = knn_predictions(train, test, "euclid")
 
 cnfsn_mtrx = confusion_matrix(
-   actual=[row[0] for row in test],
-   predict=ans_predictions,
-   labels=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    actual=[row[0] for row in test],
+    predict=test_predictions,
+    labels=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 )
 
 sum1 = 0
 for i in range(len(cnfsn_mtrx)):
-   sum1 = sum1 + sum(cnfsn_mtrx[i])
+    sum1 = sum1 + sum(cnfsn_mtrx[i])
 
 pre_accuracy = 0
 for i in range(10):
     pre_accuracy = pre_accuracy + cnfsn_mtrx[i][i]
 
-print("Accuracy Percentage = " + str(pre_accuracy*100/len(ans_predictions)))
+print("Confusion Matrix = " + str(cnfsn_mtrx))
+print("Accuracy Percentage = " + str(pre_accuracy * 100 / len(test_predictions)))
 
 
 # returns a list of labels for the query dataset based upon observations in the train dataset.
@@ -166,7 +169,7 @@ def initialize_centroids(data, k):
     initial_centroids = []
 
     for i in range(k):
-        random.seed(i*100)
+        random.seed(i * 100)
         initial_centroids_index = random.randint(0, len(data) - 1)
         initial_centroids.append(data[initial_centroids_index])
 
@@ -214,14 +217,19 @@ def kmeans(train, metric):
         error.append(sum(iter_error))
         temp_centroids = [[]] * 10
         for i in range(len(temp_centroids)):
-            temp_centroids[i] = [i, [0]*784, 0]
+            temp_centroids[i] = [i, [0] * 784, 0]
         for k in range(len(new_centroids)):
             for temp_centroid in temp_centroids:
                 if new_centroids[k] == temp_centroid[0]:
                     temp_centroid[1] = [int(x) + int(y) for x, y in zip(temp_centroid[1], train[k][1])]
                     temp_centroid[2] = temp_centroid[2] + 1
         for k, temp_centroid in enumerate(temp_centroids):
-            avg_pixels = [round((pixel / temp_centroid[2]), 3) for pixel in temp_centroid[1]]
+            if temp_centroid[2] == 0:
+                avg_pixels = initialize_centroids(train, 1)
+                print(avg_pixels)
+                avg_pixels = avg_pixels[0][1]
+            else:
+                avg_pixels = [round((pixel / temp_centroid[2]), 3) for pixel in temp_centroid[1]]
             centroids[k] = [temp_centroid[0], avg_pixels]
 
         if len(error) < 2:
@@ -237,7 +245,8 @@ def kmeans(train, metric):
     return centroids, error
 
 
-centroids, error= kmeans(train, "euclid")
+print("Starting k-Means - Euclid")
+centroids, error = kmeans(train, "euclid")
 print(centroids)
 print(error)
 
