@@ -75,80 +75,80 @@ test = read_data("test.csv")
 # returns a list of labels for the query dataset based upon labeled observations in the train dataset.
 # metric is a string specifying either "euclidean" or "cosim".  
 # All hyper-parameters should be hard-coded in the algorithm.
-# def knn(train, query, metric):
-#    k = 10
-#    distances = list()
-#    for train_row in train:
-#        if metric == "euclid":
-#            dist = euclidean(query[1], train_row[1])
-#        else:
-#            dist = cosim(query, train_row)
-#        distances.append((train_row, dist))
-#    distances.sort(key=lambda tup: tup[1])
-#    neighbors = list()
-#    for i in range(k):
-#        neighbors.append(distances[i][0])
-#    return neighbors
+def knn(train, query, metric):
+    k = 10
+    distances = list()
+    for train_row in train:
+        if metric == "euclid":
+            dist = euclidean(query[1], train_row[1])
+        else:
+            dist = cosim(query, train_row)
+        distances.append((train_row, dist))
+    distances.sort(key=lambda tup: tup[1])
+    neighbors = list()
+    for i in range(k):
+        neighbors.append(distances[i][0])
+    return neighbors
 
 
-# def predict_classification(train, query, metric):
-#    if metric == "euclid":
-#        neighbors = knn(train, query, "euclid")
-#    else:
-#        neighbors = knn(train, query, "cosim")
-#   output_values = [row[0] for row in neighbors]
-#    prediction = max(set(output_values), key=output_values.count)
-#    return prediction
+def predict_classification(train, query, metric):
+    if metric == "euclid":
+        neighbours = knn(train, query, "euclid")
+    else:
+        neighbours = knn(train, query, "cosim")
+    output_values = [row[0] for row in neighbours]
+    prediction = max(set(output_values), key=output_values.count)
+    return prediction
 
 
-# def knn_predictions(train, test, metric):
-#    predictions = list()
-#    count = 0
-#    for row in test:
-#        if metric == "euclid":
-#            print("Starting Calculating Predictions on test row " + str(count))
-#            output = predict_classification(train, row, "euclid")
-#        else:
-#            print("Starting Calculating Predictions on test row " + str(count))
-#            output = predict_classification(train, row, "cosim")
-#        predictions.append(output)
-#        count = count + 1
-#    return predictions
+def knn_predictions(train, test, metric):
+    predictions = list()
+    count = 0
+    for row in test:
+        if metric == "euclid":
+            print("Starting Calculating Predictions on test row " + str(count))
+            output = predict_classification(train, row, "euclid")
+        else:
+            print("Starting Calculating Predictions on test row " + str(count))
+            output = predict_classification(train, row, "cosim")
+        predictions.append(output)
+        count = count + 1
+    return predictions
 
 
-# def confusion_matrix(actual, predict, labels):
-#    matrix = [[0 for i in range(len(labels))] for j in range(len(labels))]
-#    if len(actual) != len(predict):
-#        print("Lengths of estimate and predicted don't match. Try again")
-#    else:
-#        for i in range(len(labels)):
-#            for j in range(len(labels)):
-#                for k in range(len(actual)):
-#                    a = int(actual[k])
-#                    p = int(predict[k])
-#                    if a == i:
-#                        if p == j:
-#                            matrix[a][p] = matrix[a][p] + 1
-#    return matrix
+def confusion_matrix(actual, predict, labels):
+    matrix = [[0 for i in range(len(labels))] for j in range(len(labels))]
+    if len(actual) != len(predict):
+        print("Lengths of estimate and predicted don't match. Try again")
+    else:
+        for i in range(len(labels)):
+            for j in range(len(labels)):
+                for k in range(len(actual)):
+                    a = int(actual[k])
+                    p = int(predict[k])
+                    if a == i:
+                        if p == j:
+                            matrix[a][p] = matrix[a][p] + 1
+    return matrix
 
 
-# ans_predictions = knn_predictions(train, test, "euclid")
-#
-# cnfsn_mtrx = confusion_matrix(
-#    actual=[row[0] for row in test],
-#    predict=ans_predictions,
-#    labels=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-# )
-#
-# sum1 = 0
-# for i in range(len(cnfsn_mtrx)):
-#    sum1 = sum1 + sum(cnfsn_mtrx[i])
+ans_predictions = knn_predictions(train, test, "euclid")
 
-# pre_accuracy = 0
-# for i in range(10):
-#    pre_accuracy = pre_accuracy + cnfsn_mtrx[i][i]
+cnfsn_mtrx = confusion_matrix(
+   actual=[row[0] for row in test],
+   predict=ans_predictions,
+   labels=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+)
 
-# print("Accuracy Percentage = " + str(pre_accuracy*100/len(ans_predictions)))
+sum1 = 0
+for i in range(len(cnfsn_mtrx)):
+   sum1 = sum1 + sum(cnfsn_mtrx[i])
+
+pre_accuracy = 0
+for i in range(10):
+    pre_accuracy = pre_accuracy + cnfsn_mtrx[i][i]
+
+print("Accuracy Percentage = " + str(pre_accuracy*100/len(ans_predictions)))
 
 
 # returns a list of labels for the query dataset based upon observations in the train dataset.
@@ -167,22 +167,19 @@ def initialize_centroids(data, k):
 
 
 def assign_centroid(data, centroids, metric):
-    n_observations = len(data)
     centroid_assign = []
     centroid_errors = []
-    k = len(centroids)
 
-    for observation in range(n_observations):
+    for observation in data:
         errors = []
-        for centroid in range(k):
+        for centroid in centroids:
             if metric == "euclid":
-                error = round(euclidean(centroids[centroid][1], data[observation][1]), 3)
+                error = round(euclidean(centroid[1], observation[1]), 3)
             else:
-                error = round(cosim(centroids[centroid][1], data[observation][1]), 3)
+                error = round(cosim(centroid[1], observation[1]), 3)
 
             errors.append(error)
 
-        # Calculate closest centroid & error
         centroid_error = min(errors)
         for i in range(len(errors)):
             if errors[i] == centroid_error:
@@ -201,49 +198,46 @@ def kmeans(train, metric):
 
     centroids = initialize_centroids(train, k)
     error = []
-    compr = True
-    i = 0
+    exit = True
     iter = 0
 
-    while compr and iter <= num_iter:
+    while exit and iter < num_iter:
         print(str(iter) + " iteration started")
         new_centroids, iter_error = assign_centroid(train, centroids, metric)
         error.append(sum(iter_error))
-        for k in range(len(centroids)):
-            print(str(k) + " label started")
-            counter = 0
-            for j in range(len(new_centroids)):
-                centroid_label = centroids[k][0]
-                if int(centroid_label) == int(new_centroids[j]):
-                    centroids[k][1] = [int(x) + int(y) for x, y in zip(centroids[k][1], train[j][1])]
-                    counter = counter + 1
-            print(str(k) + " label done with " + str(counter) + " observations")
-            print("-----")
-            for avg_pixel in centroids[k][1]:
-                avg_pixel = round(int(avg_pixel) / counter, 3)
+        temp_centroids = [[]] * 10
+        for i in range(len(temp_centroids)):
+            temp_centroids[i] = [i, [0]*784, 0]
+        for k in range(len(new_centroids)):
+            for temp_centroid in temp_centroids:
+                if new_centroids[k] == temp_centroid[0]:
+                    temp_centroid[1] = [int(x) + int(y) for x, y in zip(temp_centroid[1], train[k][1])]
+                    temp_centroid[2] = temp_centroid[2] + 1
+        for k, temp_centroid in enumerate(temp_centroids):
+            avg_pixels = [round((pixel / temp_centroid[2]), 3) for pixel in temp_centroid[1]]
+            centroids[k] = [temp_centroid[0], avg_pixels]
 
         if len(error) < 2:
-            compr = True
+            exit = True
         else:
             if error[iter] != error[iter - 1]:
-                compr = True
+                exit = True
             else:
-                compr = False
-        i = i + 1
+                exit = False
         iter = iter + 1
+        print(error)
 
-    return new_centroids, error, centroids
+    return centroids, error
 
 
-new_centroids, error, centroids = kmeans(train, "euclid")
+centroids, error= kmeans(train, "euclid")
 print(centroids)
-print(len(centroids))
 print(error)
 
 
-#def main():
-    #show('valid.csv', 'pixels')
+def main():
+    show('valid.csv', 'pixels')
 
 
-#if __name__ == "__main__":
-#    main()
+if __name__ == "__main__":
+    main()
